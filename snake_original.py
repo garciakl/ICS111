@@ -4,7 +4,7 @@ import random
 
 pygame.init()
 
-screen_width = 600
+screen_width = 800
 screen_height = 600
 
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -12,17 +12,15 @@ pygame.display.set_caption("Snake")
 
 font = pygame.font.SysFont(None, 40)
 
-again_rect = Rect(screen_width // 2-80, screen_height // 2, 160, 50)
+again_rect = Rect(screen_width // 2 - 80, screen_height // 2, 160, 50)
 
 #define snake variables
 snake_pos = [[int(screen_width / 2), int(screen_height / 2)]]
-snake_pos.append([300,310])
-snake_pos.append([300,320])
-snake_pos.append([300,330])
+snake_pos.append([1000,1000])
 direction = 1
 
 #define game variables
-cell_size = 10
+cell_size = 20
 update_snake = 0
 food = [0,0]
 new_food = True
@@ -45,22 +43,20 @@ def draw_screen():
         screen.fill(bg)
 
 def draw_score():
-    score_txt = "Score: " + str(score)
+    score_txt = "SCORE: " + str(score)
     score_img = font.render(score_txt, True, pink)
     screen.blit(score_img, (0,0))
 
 def check_game_over(game_over):
-    #first check, snake eaten itself
+    #first check if snake has eaten itself
     head_count = 0
     for x in snake_pos:
         if snake_pos[0] == x and head_count > 0:
             game_over = True
         head_count += 1
-
-    #second check, out of bounds
+    #second check if snake is out of bounds
         if snake_pos[0][0] < 0 or snake_pos[0][0] >= screen_width or snake_pos[0][1] < 0 or snake_pos[0][1] >= screen_height:
             game_over = True
-
     return game_over
 
 def draw_game_over():
@@ -133,21 +129,16 @@ while run:
             #first shift the position of snake back
             snake_pos = snake_pos[-1:] + snake_pos[:-1]
             #now update the position of head based on direction
-            #head up
-            if direction == 1:
+            if direction == 1:  # up
                 new_head[1] -= cell_size
-            #head down
-            elif direction == 3:
+            elif direction == 3:  # down
                 new_head[1] += cell_size
-            #head right
-            elif direction == 2:
+            elif direction == 2:  # right
                 new_head[0] += cell_size
-            #head left
-            elif direction == 4:
+            elif direction == 4:  # left
                 new_head[0] -= cell_size
 
             snake_pos.insert(0, new_head)
-
             game_over = check_game_over(game_over)
 
             if snake_pos[0] != food:
@@ -164,25 +155,19 @@ while run:
             update_snake = 0
             food = [0,0]
             new_food = True
-            new_piece = [0,0]
+            new_piece = [-1,-1]
             #define snake variables
             snake_pos = [[int(screen_width / 2), int(screen_height / 2)]]
-            snake_pos.append([300,310])
-            snake_pos.append([300, 320])
-            snake_pos.append([300, 330])
+            snake_pos.append([1000,1000])
             direction = 1 #1 is up, 2 is down, 3 is down, 4 is left
             score = 0
 
-    head = 1
+    head_drawn = False
     for x in snake_pos:
-
-        if head == 0:
-            pygame.draw.rect(screen, body_outer, (x[0], x[1] + 1, cell_size, cell_size))
-            pygame.draw.rect(screen, body_outer, (x[0] +1, x[1] + 1, cell_size - 2, cell_size - 2))
-        if head == 1:
-            pygame.draw.rect(screen, body_outer, (x[0], x[1] + 1, cell_size, cell_size))
-            pygame.draw.rect(screen, (255,0,0), (x[0] +1, x[1] + 1, cell_size - 2, cell_size - 2))
-            head = 0
+        if not head_drawn:
+            pygame.draw.rect(screen, body_inner, (x[0], x[1] + 1, cell_size - 2, cell_size - 2))
+        else:
+            pygame.draw.rect(screen, body_outer, (x[0], x[1], cell_size, cell_size))
 
     pygame.display.update()
 
