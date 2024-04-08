@@ -12,7 +12,7 @@ pygame.display.set_caption("Snake")
 
 font = pygame.font.SysFont(None, 40)
 
-again_rect = Rect(screen_width // 2 - 80, screen_height // 2, 160, 50)
+again_rect = Rect(screen_width // 2-80, screen_height // 2, 160, 50)
 
 #define snake variables
 snake_pos = [[int(screen_width / 2), int(screen_height / 2)]]
@@ -46,6 +46,9 @@ body_inner = pink
 body_outer = yellow
 food_col = green
 
+draw_food(food_pos)
+    screen.blit(food_img, food_pos)
+
 def draw_title_screen():
     screen.fill(bg)
     title_text = font.render("Hungry Hungry Hebi", True, yellow)
@@ -57,7 +60,7 @@ def draw_title_screen():
     screen.blit(start_text, start_rect)
 
 def draw_score():
-    score_txt = "SCORE: " + str(score)
+    score_txt = "Score: " + str(score)
     score_img = font.render(score_txt, True, pink)
     screen.blit(score_img, (0,0))
 
@@ -67,6 +70,7 @@ def check_game_over(game_over):
     for x in snake_pos:
         if snake_pos[0] == x and head_count > 0:
             game_over = True
+        head_count += 1
     #second check if snake is out of bounds
         if snake_pos[0][0] < 0 or snake_pos[0][0] >= screen_width or snake_pos[0][1] < 0 or snake_pos[0][1] >= screen_height:
             game_over = True
@@ -84,7 +88,6 @@ def draw_game_over():
     screen.blit(again_img, (screen_width // 2 - 80, screen_height // 2 + 10))
 
 run = True
-game_over = False
 while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -99,49 +102,41 @@ while run:
             elif event.key == pygame.K_LEFT and direction != 2:
                 direction = 4
 
-    if game_state == TITLE:
-        draw_title_screen()
-        draw_score()
-        pygame.display.update()
+    draw_title_screen()
+    draw_score()
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_pos = pygame.mouse.get_pos()
-            if start_rect.collidepoint(mouse_pos):
-                game_state = PLAYING
+    #create food
+    if new_food == True:
+        new_food = False
+        food[0] = cell_size * random.randint(0, (screen_width // cell_size) - 1)
+        food[1] = cell_size * random.randint(0, (screen_height // cell_size) - 1)
 
-    elif game_state == PLAYING:
-        screen.fill(bg)
-        draw_score()
-        #create food
-        if new_food == True:
-            new_food = False
-            food[0] = cell_size * random.randint(0, (screen_width // cell_size) - 1)
-            food[1] = cell_size * random.randint(0, (screen_height // cell_size) - 1)
+    #draw food
+    pygame.draw.rect(screen, food_col, (food[0], food[1], cell_size, cell_size))
 
-        #draw food
-        pygame.draw.rect(screen, food_col, (food[0], food[1], cell_size, cell_size))
+    #check if food was eaten
+    if snake_pos[0] == food:
+        new_food = True
+        #create new piece at end of snake tail
+        new_piece = list(snake_pos[-1])
+        #add extra piece to snake
+        if direction == 1:
+            new_piece[1] += cell_size
+        #down
+        if direction == 3:
+            new_piece[1] -= cell_size
+        #right
+        if direction == 2:
+            new_piece[0] -= cell_size
+        #left
+        if direction == 4:
+            new_piece[0] += cell_size
 
-        #check if food was eaten
-        if snake_pos[0] == food:
-            new_food = True
-            #create new piece at end of snake tail
-            new_piece = list(snake_pos[-1])
-            #add extra piece to snake
-            if direction == 1:
-                new_piece[1] += cell_size
-            #down
-            if direction == 3:
-                new_piece[1] -= cell_size
-            #right
-            if direction == 2:
-                new_piece[0] -= cell_size
-            #left
-            if direction == 4:
-                new_piece[0] += cell_size
-            #attach new piece to end of snake
-            snake_pos.append(new_piece)
-            #increase score
-            score += 1
+        #attach new piece to end of snake
+        snake_pos.append(new_piece)
+
+        #increase score
+        score += 1
 
     if game_over == False:
         #update snake
